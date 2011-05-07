@@ -1,0 +1,87 @@
+% Finding birds in images
+% 
+% Steps followed:
+%   1. Initialize variables
+%   2. Segment the image
+%   3. Clean up the segments by subsuming smaller regionMap
+%   4. Output a PNG image with colored segments and labels for some of the
+%   region IDs
+%   5. Attempt to recognize each one of the regionMap (using a trained
+%   classifier - linear SVM)
+%   6. Output the results with separate color coded regionMap overlayed over
+%   the original image
+% 
+% Author: Nikhil Patwardhan
+
+clear; clc;
+
+% Define constants
+rgThreshold = 0.10;             % Threshold for region growing
+maxImgWidth = 400;              % Resize if more than this
+smallRegionSizeSqPx = 65;       % In square pixels
+windowBorder = 5;               % Around a region when subsuming
+imageDirectory = '.\img\';      % Source Directory
+nColorBins = 64;                % Per channel for histogram
+nSIFT = 175;                    % Clusters from SIFT features
+nLabels = 6;                    % Number of Categories
+
+% Add the necessary paths
+addpath('..\common_utils\');
+addpath('..\common_utils\region\');
+addpath('..\common_utils\segmentation\');
+addpath('..\common_utils\classifier\');
+addpath('..\common_utils\libsvm-mat-3.0-1\');
+addpath('C:\\Users\\Nikhil\Downloads\\vlfeat-0.9.9-bin\\vlfeat-0.9.9\\toolbox\\');
+vl_setup
+
+% Read all files
+filesList = dir(imageDirectory);
+[mRows, mCols] = size(filesList);
+
+% Start Logging
+startLog;
+
+% Process all images in a certain directory
+for k=1:mRows-2
+    t1 = tic;
+    filename = strcat(imageDirectory,filesList(k+2).name);
+    disp(sprintf('Reading file: %s',filename));
+    
+    % Initialization and Preprocessing
+    [flags,regionMap,smallRegionIDs,dI,I,height,width] = ...
+        initSegmenter(filename,maxImgWidth);
+    
+    % Segmentation
+    [smallRegionIDs, nSmallRegions, regionMap] = ...
+        segmentImage(dI, flags, rgThreshold, regionMap, ...
+                        smallRegionIDs, smallRegionSizeSqPx);
+    
+    % Cleanup the regionMap
+    [regionMap] = ...
+        subsumeSmallRegions(regionMap, smallRegionIDs, nSmallRegions, ...
+                            windowBorder, height, width);
+    
+    % Color the regionMap
+    nRegions = numel(unique(regionMap));    % Update the number of regionMap
+    [coloredSegments] = colorSegmentedImage(regionMap, nRegions, height, width);
+    
+    % Filename without the extension (assuming .jpg)
+    filenameNE = strcat(imageDirectory,substr(filesList(k+2).name,0,-4));
+    newfilename = sprintf('%s_numReg_%d_time_%.0f_thr_%.2f_sS_%d.png',...
+                  filenameNE,nRegions,toc(t1),rgThreshold,smallRegionSizeSqPx);
+    
+    % Save segmentation result
+    imwrite(coloredSegments,newfilename);
+    
+    % Attempt recognizing segments
+%     [topLabels] = tryPrediction(I, regionMap, unique(regionMap), nColorBins, nSIFT, nLabels);
+%     colorPrediction(I, regionMap, unique(regionMap), topLabels, filename);
+    
+    % Save variables and results
+    matfilename = sprintf('%s_numReg_%d_time_%.0f_thr_%.2f_sS_%d.mat',...
+                    filenameNE,nRegions,toc(t1),rgThreshold,smallRegionSizeSqPx);
+    save(matfilename,'regionMap');
+    
+    disp(sprintf('Finished processing file: %s',filename));
+    disp(sprintf('Summary: Number of regionMap = %d, Time elapsed = %.0f seconds.',nRegions,toc(t1)));
+end;
