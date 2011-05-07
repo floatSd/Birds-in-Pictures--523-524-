@@ -1,0 +1,27 @@
+-- Create Table
+create table complete_ny_ebird_data
+(obs_county varchar(80), obs_data date, genus varchar(70), species varchar(70), common_name varchar(100), obs_number int, lat float, lon float);
+
+--MySQL
+./genSQL.gawk < /media/Windows7_OS/Users/Nikhil/Documents/Big\ Files/eBird\ Data/Extracted/10.csv > results.sql
+mysql --user=dummy --password=dummy mysql < results.sql
+
+
+
+-- MS SQL Server
+-- Extract relevant data into CSV file
+./SQLSERVERgenSQL.gawk < eBirdFile.txt > results.csv
+
+-- Convert to Windows format (newlines)
+sed -e 's/$/\r/' results.csv > results.csv
+
+-- Import in MS SQL Server
+bulk
+insert complete_ny_ebird_data
+from 'C:\Users\Nikhil\Documents\Courses\cse523\Data Analysis\regions\r2.csv'
+with
+(
+FIELDTERMINATOR = ',',
+ROWTERMINATOR = '\n'
+)
+GO
