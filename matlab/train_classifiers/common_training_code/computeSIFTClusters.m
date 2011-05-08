@@ -1,10 +1,13 @@
 function [centroids] = ...
-    computeSIFTClusters(siftmatfile, nSiftDimensions, nSiftClusters)
+    computeSIFTClusters(siftmatfile, nSiftDimensions, nSiftClusters, nRandomSelect)
 %% Clusters the SIFT descriptors by selecting some of them at random.
 %  matfile = cell array with all categories' sift descriptors.
 %  Works on a set of categories as a whole.
 
-nRandomSelect = 0.25;       % Percentage of features to be selected
+if (nargin < 4)
+    nRandomSelect = 0.25;       % Percentage of features to be selected
+end;
+
 all = [];
 
 load(siftmatfile);          % siftDescriptors

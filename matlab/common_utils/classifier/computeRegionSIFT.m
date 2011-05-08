@@ -1,18 +1,24 @@
-function [siftDescriptor] = computeRegionSIFT(I, regionMap, regid)
-%% Returns the SIFT descriptor(s) for an irregular region by imposing a grid
-% pattern over the region and computing the SIFT descriptor of each cell in
-% the grid that has a substantial portion belonging to that region.
+function siftDescriptors = computeRegionSIFT(I, regionMap, regid)
+%{
+Returns the SIFT descriptor(s) for an irregular region by imposing a grid
+pattern over the region and computing the SIFT descriptor of each cell in
+the grid that has a substantial portion belonging to that region.
 
-% siftSizes specifies the area in sq. px. that corresponds to each cell in
-% the siftDescriptor{} array
+If none of the grid units cover the region substantially, then a SIFT
+descriptor is found for each of the grid units that can fit in that region.
+%}
 
 %% PART 1 : Initialize variables
-gridUnit = 100;                  % Grid dimension in pixels
-siftDescriptor = {};            % Number of elements unknown
+gridUnit = 10;                   % Grid dimension in pixels
+siftDescriptors = {};            % Number of elements unknown
 
 %% PART 2 : Get a bounding box for the region from the image
 [w h startRow startCol] = findRegionBoundingBox(regionMap, regid);
 regSize = numel(find(regionMap == regid));
+
+if (regSize == 0)
+    disp(sprintf('computeRegionSIFT: Serious error in computing SIFT descriptor for region %d',regid));
+end;
 
 % Extract the box containing the region
 box = uint8(zeros(h,w,3));
@@ -20,18 +26,15 @@ box(1:h,1:w,1) = I(startRow:startRow+h-1,startCol:startCol+w-1,1);
 box(1:h,1:w,2) = I(startRow:startRow+h-1,startCol:startCol+w-1,2);
 box(1:h,1:w,3) = I(startRow:startRow+h-1,startCol:startCol+w-1,3);
 
-%% If the region is too small, find the SIFT descriptor of the whole box,
-% Else, compute a SIFT descriptor for every grid cell that has a
-% substantial portion belonging to the region.
-
-graybox = single(rgb2gray(box));
+origbox = rgb2gray(box);        % For debugging
+graybox = single(origbox);
 
 % disp(length(h));
 % disp(length(w));
 % disp(regSize);
 
 if (h < gridUnit || w < gridUnit)
-    [f siftDescriptor{1}] = vl_sift(graybox);
+    [f siftDescriptors{1}] = vl_sift(graybox);       % Assumption: Its area is gridUnit * gridUnit
 else
     countCells = 0;
     hCells = uint16(floor(h/gridUnit));
@@ -46,8 +49,8 @@ else
             gridCellRegionMap = ...
                 regionMap(gridCellStartRow:gridCellEndRow,gridCellStartCol:gridCellEndCol);
             
-            % Is the number of pixels occupied by the region more than 15%?
-            if (numel(find(gridCellRegionMap == regid)) > 0.15*gridUnit*gridUnit)
+            % Is the number of pixels occupied by the region more than 75%?
+            if (numel(find(gridCellRegionMap == regid)) > 0.75*gridUnit*gridUnit)
                 
                 % Get a SIFT descriptor for the cell
                 gridCell = graybox(1+(i-1)*gridUnit:i*gridUnit,...
@@ -57,13 +60,29 @@ else
                 if ~isempty(d)
                     % Increment the counter
                     countCells = countCells + 1;
-                    siftDescriptor{countCells} = d;
+                    siftDescriptors{countCells} = d;
                 end;
             end;
         end;
     end;
     
+    % If all the above computation resulted in 0 descriptors, ignore the
+    % 75% threshold and try again
     if (countCells == 0)
-        [f siftDescriptor{1}] = vl_sift(graybox);
+        countCells = 0;
+        for i=1:hCells              % Rows
+            for j=1:wCells          % Cols
+                gridCell = graybox(1+(i-1)*gridUnit:i*gridUnit,...
+                        1+(j-1)*gridUnit:j*gridUnit);
+                [f d] = vl_sift(gridCell);
+
+                if ~isempty(d)
+                    countCells = countCells + 1;
+                    siftDescriptors{countCells} = d;
+                end;
+            end;
+        end;
     end;
 end;
+
+% disp(sprintf('Returning %d descriptors for region %d',length(siftDescriptors),regid));

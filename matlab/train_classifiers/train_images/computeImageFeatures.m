@@ -61,7 +61,8 @@ for k=1:length(categoryNames)
         end;
 
         % Compute SIFT descriptor
-        [f kSIFTDescriptors{j}] = vl_sift(I);
+        [f d] = vl_sift(I);
+        kSIFTDescriptors{j} = d;
     end;
 
     features{k} = kFeatures;
