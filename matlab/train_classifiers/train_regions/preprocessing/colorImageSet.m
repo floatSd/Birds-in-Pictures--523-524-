@@ -16,6 +16,7 @@ maxImgWidth = 400;
 nFiles = length(filenames);
 segfilenames = cell(nFiles,1);
 for i=1:nFiles
+    disp(i);
     kRegionMap = regionMaps{i};
     I = imread(filenames{i});
     if (size(I,2) > maxImgWidth)
