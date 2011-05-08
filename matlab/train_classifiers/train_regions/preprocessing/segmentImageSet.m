@@ -1,7 +1,6 @@
 function segmentImageSet(setName)
 %% TASK : Segmenting images to get regions, based on a (color) region
 %% growing algorithm
-clear; clc;
 
 % Define constants
 rgThreshold = 0.10;             % Threshold for region growing segmentation
@@ -9,7 +8,7 @@ maxImgWidth = 400;              % Resize if more than this
 smallRegionSize = 65;           % In square pixels
 border = 5;                     % Around a region when subsuming
 
-baseImageDirectory = '../../../datafiles/region_training/';
+baseImageDirectory = '../../../../datafiles/region_training/';
 imageDirectory = sprintf('%soriginal_images/%s/',baseImageDirectory,setName);
 
 % Add the necessary paths
@@ -19,15 +18,17 @@ addpath('../../../common_utils/region/');
 addpath('../../../common_utils/segmentation/');
 
 % Read all files
-list = dir(imageDirectory);
+disp(sprintf('Scanning directory %s...',imageDirectory));
+list = dir(strcat(imageDirectory,'*.jpg'));
 [mRows, mCols] = size(list);
+disp(sprintf('Found %d files...',mRows));
 
 filenames = {};
 regionMaps = {};
 
-for k=1:mRows-2
+for k=1:mRows
     t1 = tic;
-    filename = strcat(imageDirectory,list(k+2).name);
+    filename = strcat(imageDirectory,list(k).name);
     disp(sprintf('Reading file: %s',filename));
     
     % Initialization and Preprocessing

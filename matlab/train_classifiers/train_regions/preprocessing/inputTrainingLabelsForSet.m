@@ -1,7 +1,7 @@
 function inputTrainingLabelsForSet(setName)
 %% TASK : Manually labelling regions in images
 
-baseImageDirectory = '../../../datafiles/region_training/';
+baseImageDirectory = '../../../../datafiles/region_training/';
 
 loadFile2 = sprintf('%ssfn_%s.mat',baseImageDirectory,setName);
 loadFile1 = sprintf('%srmap_%s.mat',baseImageDirectory,setName);

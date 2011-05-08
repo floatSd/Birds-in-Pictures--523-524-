@@ -1,8 +1,7 @@
 function colorImageSet(setName)
 %% TASK : Coloring regions in images with associated region IDs
 
-baseImageDirectory = '../../../datafiles/region_training/';
-imageDirectory = sprintf('%s%s/',baseImageDirectory,setName);
+baseImageDirectory = '../../../../datafiles/region_training/';
 
 % Add the necessary paths
 addpath('../../../common_utils/');
