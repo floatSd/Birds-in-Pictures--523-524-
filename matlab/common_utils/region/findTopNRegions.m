@@ -17,7 +17,3 @@ regids = zeros(n,1);
 for i=numRegions:-1:numRegions-n+1
     regids(1+numRegions-i) = allRegionSizes(i,1);
 end;
-
-% disp(sprintf('The top %d regionMap are %d %d %d with sizes %d %d %d', n...
-%     , regids(1), regids(2), regids(3)...
-%     , numel(find(regionMap == regids(1))), numel(find(regionMap == regids(2))), numel(find(regionMap == regids(3)))));

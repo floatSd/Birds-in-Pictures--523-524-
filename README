@@ -1,0 +1,50 @@
+Identifying Birds in Cell-phone Images
+-- By Nikhil Patwardhan
+-- Project Advisor: Prof. Steven Skiena
+
+main.m
+------
+This is the main file which controls the flow of the program. At a high level, this file does the following actions for all files it finds in a directory:
+1. Pre-process the image
+2. Segment the image
+3. Clean up the segments by subsuming regions
+4. Identify segments using a classifier and label them in the output
+
+initSegmenter.m
+---------------
+Initialization and preprocessing routine.
+Resizes images if the width exceeds a certain value.
+
+segmentImage.m
+-------------------------------
+Segments an entire image using color region growing.
+Original grayscale intensity region growing code was written by D. Kroon, University of Twente.
+This code has been modified to work in color space.
+
+subsumeSmallRegions.m
+---------------------
+Subsumes small regions from the segmentation output by looking for the most frequent region inside a window around a small region and merging to it.
+
+colorSegmentedImage.m
+---------------------
+Colors an image with sequential but random intensity R, G, B tints after it has been segmented. The intensity of the tints is randomly selected in the range 0.1 to 1.0 so that completely black regions are not rendered in the output.
+
+tryPrediction.m
+---------------
+Calculates the probabilities for regions to belong to a certain category and returns the labels.
+
+colorPrediction.m
+-----------------
+Colors the image based on identified labels for regions.
+
+==============================================================================================================================================================
+Training the classifiers:
+-------------------------
+One svm is trained per category to get a model per category.
+
+Flow for images:
+----------------
+computeImageFeatures.m
+	Loops through all _images_ and finds the SIFT descriptor and Color Histogram for each.
+	Clusters the SIFT descriptors and gets centroids for each cluster.
+	Loops through all _images'_ SIFT descriptors and calculates Visual Word Histogram.

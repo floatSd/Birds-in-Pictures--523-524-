@@ -60,4 +60,4 @@ disp('Optimum parameters: ');
 disp(max);
 disp(pc);
 disp(pg);
-save('optimumblack.mat','max','pc','pg','acc');
+save('optimum.mat','max','pc','pg','acc');

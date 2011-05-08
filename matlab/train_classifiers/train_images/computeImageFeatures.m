@@ -9,25 +9,26 @@ nSiftClusters = 175;
 nSiftDimensions = 128;
 nVisualFeatures = 3 * nColorBins + nSiftClusters;
 
+baseImageDirectory = '../../../datafiles/image_training/';
+categoryNames = {'grass/','buildings/','mud/','roads/','snow/','water/'};
+nCategories = length(categoryNames);
+
 features = cell(nCategories,1);              % Visual features for each image in each category
 areas = cell(nCategories,1);                 % Area in Sq. Px. for each image in each category
 siftDescriptors = cell(nCategories,1);       % SIFT descriptors for each image in each category
 
-addpath('..\..\common_utils\');
-addpath('..\..\common_utils\classifier\');
-addpath('..\..\common_utils\region\');
-addpath('C:\\Users\\Nikhil\Downloads\\vlfeat-0.9.9-bin\\vlfeat-0.9.9\\toolbox\\');
-vl_setup
+addpath('../common_training_code/');
+addpath('../../common_utils/');
+addpath('../../common_utils/classifier/');
+addpath('../../common_utils/region/');
+addpath('../../common_utils/vlfeat-0.9.9/toolbox/mex/mexa64/');
 
-categoryNames = {'grass','buildings','mud','roads','snow','water'};
-nCategories = length(categoryNames);
-
-imageDirectories = {'..\..\..\..\images\webimages\training\final\grass\',...
-                    '..\..\..\..\images\webimages\training\final\buildings\',...
-                    '..\..\..\..\images\webimages\training\final\mud\',...
-                    '..\..\..\..\images\webimages\training\final\roads\',...
-                    '..\..\..\..\images\webimages\training\final\snow\',...
-                    '..\..\..\..\images\webimages\training\final\water\'};
+imageDirectories = {strcat(baseImageDirectory,categoryNames{1}),...
+                    strcat(baseImageDirectory,categoryNames{2}),...
+                    strcat(baseImageDirectory,categoryNames{3}),...
+                    strcat(baseImageDirectory,categoryNames{4}),...
+                    strcat(baseImageDirectory,categoryNames{5}),...
+                    strcat(baseImageDirectory,categoryNames{6})};
 
 %% PART 1: Loop through all images and find the SIFT descriptor and Color Histogram for each image in each category.
 for k=1:length(categoryNames)
@@ -68,18 +69,18 @@ for k=1:length(categoryNames)
     siftDescriptors{k} = kSIFTDescriptors;
 end;
 
-save('.\siftDescriptors.mat','siftDescriptors');
+save(strcat(baseImageDirectory,'siftDescriptors.mat'),'siftDescriptors');
 clearvars 'siftDescriptors';
 
 %% PART 2: Concatenate random SIFT descriptors and cluster them
 disp('Computing clusters....');
-centroids = computeSIFTClusters('.\siftDescriptors.mat', nSiftDimensions, nSiftClusters);
+centroids = computeSIFTClusters(strcat(baseImageDirectory,'siftDescriptors.mat'), nSiftDimensions, nSiftClusters);
 
-save('.\centroids.mat','centroids');
+save(strcat(baseImageDirectory,'centroids.mat'),'centroids');
 
 %% PART 3: Calculate Visual Word Histograms
 disp('Computing visual words...');
-[counts] = computeVW('.\siftDescriptors.mat', areas, nSiftDimensions, nSiftClusters, centroids);
+[counts] = computeVW(strcat(baseImageDirectory,'siftDescriptors.mat'), areas, nSiftDimensions, nSiftClusters, centroids);
 
 %% PART 4: Append the Visual Word Histograms to the Color Histograms
 for k=1:length(categoryNames)
@@ -88,5 +89,5 @@ for k=1:length(categoryNames)
     features{k} = kFeatures;
 end;
 
-save('.\features.mat','features');
+save(strcat(baseImageDirectory,'features.mat'),'features');
 disp('Done.');
