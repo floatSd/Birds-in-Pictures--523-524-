@@ -1,8 +1,10 @@
 function inputTrainingLabelsForSet(setName)
 %% TASK : Manually labelling regions in images
-upperSetName = upper(setName);
-loadFile1 = sprintf('.\\regionResults\\segmentation%s.mat',upperSetName);
-loadFile2 = sprintf('.\\coloredSegments\\%s\\segFileNames%s.mat',setName,upperSetName);
+
+baseImageDirectory = '../../../datafiles/region_training/';
+
+loadFile2 = sprintf('%ssfn_%s.mat',baseImageDirectory,setName);
+loadFile1 = sprintf('%srmap_%s.mat',baseImageDirectory,setName);
 
 load(loadFile1);        % Get filenames{} and regionMaps{}
 load(loadFile2);        % Get segfilenames{}
@@ -32,8 +34,6 @@ for i=1:nFiles
     [origImage, map1] = imread(origFilename);
     [segImage, map2] = imread(segFilename);
     
-    [width, height, z] = size(origFilename);
-    
     subplot(1,2,1), imshow(origImage), set(gcf, 'Position', get(0, 'ScreenSize'))
     subplot(1,2,2), imshow(segImage), set(gcf, 'Position', get(0, 'ScreenSize'))
     
@@ -55,5 +55,5 @@ for i=1:nFiles
     end;
 end;
 
-savefilename = sprintf('trainingLabels%s.mat',setName);
+savefilename = sprintf('%stl_%s.mat',baseImageDirectory,setName);
 save(savefilename,'trainingMaps');

@@ -1,6 +1,6 @@
 function segmentImageSet(setName)
-%% TASK : Getting regions from images
-%  Segmenting images based on a (color) region growing algorithm
+%% TASK : Segmenting images to get regions, based on a (color) region
+%% growing algorithm
 clear; clc;
 
 % Define constants
@@ -9,14 +9,14 @@ maxImgWidth = 400;              % Resize if more than this
 smallRegionSize = 65;           % In square pixels
 border = 5;                     % Around a region when subsuming
 
-imageDirectory = sprintf('..\\..\\img\\%s\\',setName);       % Source Directory
+baseImageDirectory = '../../../datafiles/region_training/';
+imageDirectory = sprintf('%soriginal_images/%s/',baseImageDirectory,setName);
 
 % Add the necessary paths
-addpath('..\..\..\common_utils\');
-addpath('..\..\..\common_utils\classifier\');
-addpath('..\..\..\common_utils\region\');
-addpath('..\..\..\common_utils\segmentation\');
-addpath('..\..\..\');
+addpath('../../../common_utils/');
+addpath('../../../common_utils/classifier/');
+addpath('../../../common_utils/region/');
+addpath('../../../common_utils/segmentation/');
 
 % Read all files
 list = dir(imageDirectory);
@@ -49,6 +49,5 @@ for k=1:mRows-2
 end;
 
 % Save variables and results
-setName = upper(setName);
-savefile = sprintf('.\\regionResults\\%s.mat',setName);
+savefile = sprintf('%srmap_%s.mat',baseImageDirectory,setName);
 save(savefile,'regionMaps','filenames');

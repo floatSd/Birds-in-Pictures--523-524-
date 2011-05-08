@@ -1,17 +1,18 @@
 function colorImageSet(setName)
 %% TASK : Coloring regions in images with associated region IDs
 
-upperSetName = upper(setName);
-loadFile = sprintf('.\\regionResults\\segmentation%s.mat',upperSetName);
-load(loadFile);             % get filenames{} and regionMaps{}
-maxImgWidth = 400;
+baseImageDirectory = '../../../datafiles/region_training/';
+imageDirectory = sprintf('%s%s/',baseImageDirectory,setName);
 
 % Add the necessary paths
-addpath('..\..\..\common_utils\');
-addpath('..\..\..\common_utils\classifier\');
-addpath('..\..\..\common_utils\region\');
-addpath('..\..\..\common_utils\segmentation\');
-addpath('..\..\..\');
+addpath('../../../common_utils/');
+addpath('../../../common_utils/classifier/');
+addpath('../../../common_utils/region/');
+addpath('../../../common_utils/segmentation/');
+
+loadFile = sprintf('%srmap_%s.mat',baseImageDirectory,setName);
+load(loadFile);             % get filenames{} and regionMaps{}
+maxImgWidth = 400;
 
 nFiles = length(filenames);
 segfilenames = cell(nFiles,1);
@@ -27,11 +28,11 @@ for i=1:nFiles
     nRegions = numel(unique(kRegionMap));
     [coloredSegments] = colorSegmentedImage(kRegionMap, nRegions, height, width);
     
-    newfilename = sprintf('.\\coloredSegments\\%s\\training_%d_Regions_%d.png',setName,i,nRegions);
+    newfilename = sprintf('%scolored_segments/%s/training_%d_regions_%d.png',baseImageDirectory,setName,i,nRegions);
     segfilenames{i} = newfilename;
     % Save segmentation result
     imwrite(coloredSegments,newfilename);
 end;
 
-savefile = sprintf('.\\coloredSegments\\%s\\segFileNames%s.mat',setName,upperSetName);
+savefile = sprintf('%ssfn_%s.mat',baseImageDirectory,setName);
 save(savefile,'segfilenames');

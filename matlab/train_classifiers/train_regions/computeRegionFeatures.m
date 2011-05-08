@@ -9,6 +9,7 @@ nSiftClusters = 50;
 nSiftDimensions = 128;
 nVisualFeatures = 3 * nColorBins + nSiftClusters;
 
+baseImageDirectory = '../../../datafiles/region_training/';
 categoryNames = {'grass','buildings','mud','roads','snow','water',...
                  'sky','leaves','bark','sand','other','bird'};
 
@@ -22,15 +23,11 @@ areas = cell(nCategories,1);                 % Area in Sq. Px. for each region i
 siftDescriptors = cell(nCategories,1);       % SIFT descriptors for each region in each category
 nSiftDescriptors = cell(nCategories,1);      % Number of SIFT descriptors per region
 
-addpath('.\preprocessing\');
-addpath('.\preprocessing\regionResults\');
-addpath('.\preprocessing\trainingMaps\');
-addpath('..\common_training_code\');
-addpath('..\..\common_utils\');
-addpath('..\..\common_utils\classifier\');
-addpath('..\..\common_utils\region\');
-addpath('C:\\Users\\Nikhil\Downloads\\vlfeat-0.9.9-bin\\vlfeat-0.9.9\\toolbox\\');
-vl_setup
+addpath('./preprocessing/');
+addpath('../common_training_code/');
+addpath('../../common_utils/');
+addpath('../../common_utils/classifier/');
+addpath('../../common_utils/region/');
 
 %% PART 1: Loop through all regions and find the SIFT descriptor and Color Histogram for each region in each category.
 nSamples = zeros(nCategories,1);    % How many samples per category
