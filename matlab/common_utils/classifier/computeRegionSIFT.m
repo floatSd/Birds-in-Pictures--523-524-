@@ -1,4 +1,4 @@
-function siftDescriptors = computeRegionSIFT(I, regionMap, regid)
+function siftDescriptors = computeRegionSIFT(I, regionMap, regid, gridUnit)
 %{
 Returns the SIFT descriptor(s) for an irregular region by imposing a grid
 pattern over the region and computing the SIFT descriptor of each cell in
@@ -8,8 +8,10 @@ If none of the grid units cover the region substantially, then a SIFT
 descriptor is found for each of the grid units that can fit in that region.
 %}
 
+if (nargin < 4)
+    gridUnit = 10;
+end;
 %% PART 1 : Initialize variables
-gridUnit = 10;                   % Grid dimension in pixels
 siftDescriptors = {};            % Number of elements unknown
 
 %% PART 2 : Get a bounding box for the region from the image

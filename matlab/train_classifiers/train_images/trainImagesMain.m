@@ -8,8 +8,8 @@
 
 % Train on 50%, Test on 50%
 
-clear;
-clc;
+nColorBins = 64;
+nSiftClusters = 175;
 nCategories = 6;
 models = cell(nCategories,1);
 probMatrix = cell(nCategories,1);
@@ -22,26 +22,26 @@ addpath('../../common_utils/libsvm-mat-3.0-1/');
 computeImageFeatures;           % Need to run only once
 
 %% PART 2: Prepare sets of positive and negative examples
-prepareTrainingMatrices;        % Need to run only once
+prepareTrainingMatrices('../../../datafiles/image_training/', nColorBins, nSiftClusters, nCategories);        % Need to run only once
 
 %% PART 3: Train the models
 %  The below values give higher individual accuracies, but lower overall
 %  accuracies in the confusion matrix.
-% [models{1} probMatrix{1} testingSize{1}] = buildAndTestModel(1, 400, 1/365);
-% [models{2} probMatrix{2} testingSize{2}] = buildAndTestModel(2, 400, 1/365);
-% [models{3} probMatrix{3} testingSize{3}] = buildAndTestModel(3, 10, 1/16);
-% [models{4} probMatrix{4} testingSize{4}] = buildAndTestModel(4, 100, 1/8);
-% [models{5} probMatrix{5} testingSize{5}] = buildAndTestModel(5, 300, 1/170);
-% [models{6} probMatrix{6} testingSize{6}] = buildAndTestModel(6, 100, 9.9/128);
+% [models{1} probMatrix{1} testingSize{1}] = buildAndTestModel(1, 400, 1/365, '../../../datafiles/image_training/', nCategories);
+% [models{2} probMatrix{2} testingSize{2}] = buildAndTestModel(2, 400, 1/365, '../../../datafiles/image_training/', nCategories);
+% [models{3} probMatrix{3} testingSize{3}] = buildAndTestModel(3, 10, 1/16, '../../../datafiles/image_training/', nCategories);
+% [models{4} probMatrix{4} testingSize{4}] = buildAndTestModel(4, 100, 1/8, '../../../datafiles/image_training/', nCategories);
+% [models{5} probMatrix{5} testingSize{5}] = buildAndTestModel(5, 300, 1/170, '../../../datafiles/image_training/', nCategories);
+% [models{6} probMatrix{6} testingSize{6}] = buildAndTestModel(6, 100, 9.9/128, '../../../datafiles/image_training/', nCategories);
 
 %  The below values give lower individual accuracies, but higher overall
 %  accuracies in the confusion matrix.
-[models{1} probMatrix{1} testingSize{1}] = buildAndTestModel(1, 800, 0.1);
-[models{2} probMatrix{2} testingSize{2}] = buildAndTestModel(2, 800, 0.1);
-[models{3} probMatrix{3} testingSize{3}] = buildAndTestModel(3, 800, 0.1);
-[models{4} probMatrix{4} testingSize{4}] = buildAndTestModel(4, 800, 0.1);
-[models{5} probMatrix{5} testingSize{5}] = buildAndTestModel(5, 800, 0.1);
-[models{6} probMatrix{6} testingSize{6}] = buildAndTestModel(6, 800, 0.1);
+[models{1} probMatrix{1} testingSize{1}] = buildAndTestModel(1, 800, 0.1, '../../../datafiles/image_training/', nCategories);
+[models{2} probMatrix{2} testingSize{2}] = buildAndTestModel(2, 800, 0.1, '../../../datafiles/image_training/', nCategories);
+[models{3} probMatrix{3} testingSize{3}] = buildAndTestModel(3, 800, 0.1, '../../../datafiles/image_training/', nCategories);
+[models{4} probMatrix{4} testingSize{4}] = buildAndTestModel(4, 800, 0.1, '../../../datafiles/image_training/', nCategories);
+[models{5} probMatrix{5} testingSize{5}] = buildAndTestModel(5, 800, 0.1, '../../../datafiles/image_training/', nCategories);
+[models{6} probMatrix{6} testingSize{6}] = buildAndTestModel(6, 800, 0.1, '../../../datafiles/image_training/', nCategories);
 
 %% PART 4: Process the results in a human understandable manner
 reorderedProbMatrix = cell(nCategories,1);

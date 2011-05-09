@@ -1,10 +1,6 @@
+function computeRegionFeatures(gridUnit, nColorBins, nSiftClusters, nSiftDimensions)
 %% To find the visual features of all regions
 % The beast:
-
-gridUnit = 10;
-nColorBins = 64;
-nSiftClusters = 50;        % TO DO
-nSiftDimensions = 128;
 nVisualFeatures = 3 * nColorBins + nSiftClusters;
 
 baseImageDirectory = '../../../../datafiles/region_training/';
@@ -23,8 +19,8 @@ addpath('../../../common_utils/classifier/');
 addpath('../../../common_utils/region/');
 addpath('../../../common_utils/vlfeat-0.9.9/toolbox/mex/mexa64/');
 
-tlFile = strcat(baseImageDirectory,'tl_set1.mat');
-rgFile = strcat(baseImageDirectory,'rmap_set1.mat');
+tlFile = strcat(baseImageDirectory,'concat_tl.mat');
+rgFile = strcat(baseImageDirectory,'concat_rmap.mat');
 
 load(tlFile);           % trainingMaps{}
 load(rgFile);           % filenames{} and regionMaps{}
@@ -99,7 +95,7 @@ for f=1:nFiles
                 % below logic
                 
                 % Get a set of SIFT descriptors for that region (as a cell array)
-                descriptors = computeRegionSIFT(I, regionMaps{f}, regid);
+                descriptors = computeRegionSIFT(I, regionMaps{f}, regid, gridUnit);
                 
                 if (isempty(descriptors))
                     disp(sprintf('Empty descriptors found for region %d!! Ignoring region.',regid));

@@ -1,17 +1,15 @@
+function prepareTrainingMatrices(baseDirectory, nColorBins, nSiftClusters, nCategories)
 % Prepare the set of training and testing matrices
-nColorBins = 64;
-nSiftClusters = 175;
-nSiftDimensions = 128;
+
 nVisualFeatures = 3 * nColorBins + nSiftClusters;
 
-nCategories = 6;
 trainingMatrices = cell(nCategories,1); % Matrices used to train models for each category
 testingMatrices = cell(nCategories,1);  % Matrices used to test models for each category
 trainingLabels = cell(nCategories,1);
 testingLabels = cell(nCategories,1);
 nAllPositives = cell(nCategories,1);    % Records how many positive samples for each category
 
-load('../../../datafiles/image_training/features.mat');             % features{}
+load(strcat(baseDirectory,'features.mat'));             % features{}
 
 disp('Preparing matrices for training...');
 % Prepare training sets
@@ -67,5 +65,5 @@ for i=1:nCategories
     end;
 end;
 
-save('../../../datafiles/image_training/trainingMatrices.mat','trainingMatrices',...
+save(strcat(baseDirectory,'trainingMatrices.mat'),'trainingMatrices',...
     'trainingLabels','testingMatrices','testingLabels');
