@@ -12,10 +12,12 @@ nAllPositives = cell(nCategories,1);    % Records how many positive samples for 
 load(strcat(baseDirectory,'features.mat'));             % features{}
 
 disp('Preparing matrices for training...');
+positiveFraction = 0.70;
+
 % Prepare training sets
 for i=1:nCategories
     % Calculate number of positive samples for Label 'i'
-    iPositiveSamples = floor(size(features{i},2)/2);
+    iPositiveSamples = floor(size(features{i},2)*positiveFraction);
     nAllPositives{i} = iPositiveSamples;
     
     % Calculate number of negative samples for Label 'i'

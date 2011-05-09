@@ -1,6 +1,6 @@
-gridUnit = 40;
+gridUnit = 50;
 nColorBins = 16;
-nSiftClusters = 75;
+nSiftClusters = 80;
 nSiftDimensions = 128;
 nCategories = 12;
 
@@ -22,12 +22,22 @@ categoryNames = {'grass','buildings','mud','roads','snow','water',...
 prepareTrainingMatrices('../../../datafiles/region_training/', nColorBins, nSiftClusters, nCategories);        % Need to run only once
 
 %% PART 3: Train the models
-% [models{1} probMatrix{1} testingSize{1}] = buildAndTestModel(1, 30, 1/30, '../../../datafiles/region_training/', nCategories);
-% [models{2} probMatrix{2} testingSize{2}] = buildAndTestModel(2, 100, 1/25, '../../../datafiles/region_training/', nCategories);
+% [models{1} probMatrix{1} testingSize{1}] = buildAndTestModel(1, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{2} probMatrix{2} testingSize{2}] = buildAndTestModel(2, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{3} probMatrix{3} testingSize{3}] = buildAndTestModel(3, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{4} probMatrix{4} testingSize{4}] = buildAndTestModel(4, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{5} probMatrix{5} testingSize{5}] = buildAndTestModel(5, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{6} probMatrix{6} testingSize{6}] = buildAndTestModel(6, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{7} probMatrix{7} testingSize{7}] = buildAndTestModel(7, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{8} probMatrix{8} testingSize{8}] = buildAndTestModel(8, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{9} probMatrix{9} testingSize{9}] = buildAndTestModel(9, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{10} probMatrix{10} testingSize{10}] = buildAndTestModel(10, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{11} probMatrix{11} testingSize{11}] = buildAndTestModel(11, 8, 2, '../../../datafiles/region_training/', nCategories);
+% [models{12} probMatrix{12} testingSize{12}] = buildAndTestModel(12, 8, 2, '../../../datafiles/region_training/', nCategories);
 
 for i=1:nCategories
     disp(sprintf('Category: %s',categoryNames{i}));
-    [models{i} probMatrix{i} testingSize{i}] = buildAndTestModel(i, 30, 1/30, '../../../datafiles/region_training/', nCategories);
+    [models{i} probMatrix{i} testingSize{i}] = buildAndTestModel(i, 64, 1/8, '../../../datafiles/region_training/', nCategories);
 end;
 
 %% PART 4: Process the results in a human understandable manner

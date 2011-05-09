@@ -51,8 +51,8 @@ else
             gridCellRegionMap = ...
                 regionMap(gridCellStartRow:gridCellEndRow,gridCellStartCol:gridCellEndCol);
             
-            % Is the number of pixels occupied by the region more than 75%?
-            if (numel(find(gridCellRegionMap == regid)) > 0.75*gridUnit*gridUnit)
+            % Is the number of pixels occupied by the region more than 90%?
+            if (numel(find(gridCellRegionMap == regid)) > 0.90*gridUnit*gridUnit)
                 
                 % Get a SIFT descriptor for the cell
                 gridCell = graybox(1+(i-1)*gridUnit:i*gridUnit,...

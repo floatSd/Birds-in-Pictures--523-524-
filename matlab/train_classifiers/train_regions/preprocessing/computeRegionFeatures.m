@@ -25,34 +25,17 @@ rgFile = strcat(baseImageDirectory,'concat_rmap.mat');
 load(tlFile);           % trainingMaps{}
 load(rgFile);           % filenames{} and regionMaps{}
 
-nSamples = zeros(nCategories,1);    % How many samples per category
-
-%% PART 0 : Make a cursory inspection of how many training samples per category are available
-nFiles = length(trainingMaps);
-for i=1:nFiles
-    for j=1:nCategories
-        if ~isempty(trainingMaps{i}{j})     % If the cell is not empty
-            nEntries = length(trainingMaps{i}{j});
-            for p=1:nEntries
-                regid = trainingMaps{i}{j}(p);
-                if (numel(find(regionMaps{i} == regid)) ~= 0)
-                    nSamples(j) = nSamples(j) + 1;
-                end;
-            end;
-        end;
-    end;
-end;
-
 %% PART 1: Loop through all regions and find the SIFT descriptor and Color Histogram for each region in each category.
 % Preallocate memory according to how many training samples per category were found
 % This is memory for the final set of descriptors (features) per region,
 % per category
+nFiles = length(trainingMaps);
 
 for i=1:nCategories
     features{i} = []; % double(zeros(nVisualFeatures,nSamples(i)));
 end;
 
-%% PART 1.3 : Calculate Color Histograms and SIFT features
+%% PART 1.1 : Calculate Color Histograms and SIFT features
 iIndex = uint16(ones(nCategories,1));       % Keep track of array index position for appending color histograms
 nSiftDescriptors = cell(nCategories,1);     % Number of SIFT descriptors per region. Each region within a category is uniquely identified by iIndex(c)
 
@@ -102,18 +85,31 @@ for f=1:nFiles
                     continue;
                 end;
                 
-                % Store the number of SIFT descriptors for that region
-                nSiftDescriptors{c}(iIndex(c)) = length(descriptors);
+                dlen = 0;
                 
+                errFlag = 1;
                 % Append the descriptors
                 for d=1:length(descriptors)
+                    if (isempty(descriptors{d}))
+                        continue;
+                    end;
+                    errFlag = 0;
                     nextPos = length(siftDescriptors{c}) + 1;
                     siftDescriptors{c}{nextPos,1} = descriptors{d};
+                    dlen = dlen + 1;
                 end;
+                
+                if (errFlag)
+                    continue;
+                end;
+                
+                % Store the number of SIFT descriptors for that region
+                nSiftDescriptors{c}(iIndex(c)) = dlen;
+                
                 % The no overheads part: Compute RGB Color Histograms
                 features{c} = [features{c} double(zeros(nVisualFeatures,1));];
-                features{c}(1:nColorBins*3,iIndex(c)) = ...
-                computeRegionRGBHistogram(I,regionMaps{f},regid,nColorBins);
+                colorHistogram = computeRegionRGBHistogram(I,regionMaps{f},regid,nColorBins);
+                features{c}(1:nColorBins*3,iIndex(c)) = colorHistogram;
                 
                 % Increment the counter for that category
                 iIndex(c) = iIndex(c) + 1;
@@ -135,6 +131,7 @@ end;
 disp('Computing clusters....');
 centroids = computeSIFTClusters(strcat(baseImageDirectory,'siftDescriptors.mat'), nSiftDimensions, nSiftClusters, 1.0);
 
+% load(strcat(baseImageDirectory,'centroids.mat'));
 save(strcat(baseImageDirectory,'centroids.mat'),'centroids');
 
 %% PART 3: Calculate Visual Word Histograms
@@ -163,6 +160,13 @@ end;
 for k=1:nCategories
     kFeatures = features{k};
     kFeatures(nColorBins*3+1:nVisualFeatures,1:size(newCounts{k},2)) = newCounts{k};
+    
+    for i=1:size(kFeatures,2)
+        x = kFeatures(:,i);
+        x = x/norm(x);
+        kFeatures(:,i) = x;
+    end;
+        
     features{k} = kFeatures;
 end;
 

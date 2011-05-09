@@ -34,10 +34,18 @@ where obs_number is not null
 order by 6
 limit 10;
 
+set @X = 40.92;
+set @Y = -73.12;
+set @MONTHNUM = 5;
+set @DELTA = 1;
+set @RADIUS = 3;
+
 /* Get a histogram */
 select common_name as 'Bird', sum(obs_number) as 'Frequency'
 from complete_ny_ebird_data
 where obs_number is not null
 and month(obs_data) >= @MONTHNUM - @DELTA and month(obs_data) <= @MONTHNUM + @DELTA
 and dist_gps(lat,lon,@X,@Y) < @RADIUS
-group by common_name;
+group by common_name
+order by 2 desc
+limit 10;

@@ -27,4 +27,6 @@ ans = ans + sloc('./train_classifiers/train_regions/computeRegionFeatures.m');
 ans = ans + sloc('./train_classifiers/train_regions/preprocessing/colorImageSet.m');
 ans = ans + sloc('./train_classifiers/train_regions/preprocessing/inputTrainingLabelsForSet.m');
 ans = ans + sloc('./train_classifiers/train_regions/preprocessing/segmentImageSet.m');
+ans = ans + sloc('./train_classifiers/train_regions/preprocessing/concatResults.m');
+ans = ans + sloc('./train_classifiers/train_regions/trainRegionsMain.m');
 disp(sprintf('MATLAB Logical SLOC: %d',ans));
