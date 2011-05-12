@@ -1,4 +1,4 @@
-function prepareTrainingMatrices(baseDirectory, nColorBins, nSiftClusters, nCategories)
+function prepareTrainingMatrices(baseDirectory, nColorBins, nSiftClusters, nCategories, positiveFraction)
 % Prepare the set of training and testing matrices
 
 nVisualFeatures = 3 * nColorBins + nSiftClusters;
@@ -12,7 +12,10 @@ nAllPositives = cell(nCategories,1);    % Records how many positive samples for 
 load(strcat(baseDirectory,'features.mat'));             % features{}
 
 disp('Preparing matrices for training...');
-positiveFraction = 0.70;
+
+if (nargin < 5)
+    positiveFraction = 0.70;
+end;
 
 % Prepare training sets
 for i=1:nCategories

@@ -16,23 +16,33 @@
 clear; clc;
 
 % Define constants
-rgThreshold = 0.10;             % Threshold for region growing
-maxImgWidth = 400;              % Resize if more than this
-smallRegionSizeSqPx = 65;       % In square pixels
-windowBorder = 5;               % Around a region when subsuming
-imageDirectory = '.\img\';      % Source Directory
-nColorBins = 64;                % Per channel for histogram
-nSIFT = 175;                    % Clusters from SIFT features
-nLabels = 6;                    % Number of Categories
+rgThreshold = 0.10;                         % Threshold for region growing
+maxImgWidth = 400;                          % Resize if more than this
+smallRegionSizeSqPx = 65;                   % In square pixels
+windowBorder = 5;                           % Around a region when subsuming
+imageDirectory = '../../datafiles/tests/';     % Source Directory
+nColorBins = 32;                            % Per channel for histogram
+nSIFTClusters = 50;                         % Clusters from SIFT features
+gridUnit = 40;
+probThreshold = 0.2;
+
+categoryNames = {'grass','buildings','mud','roads','snow','water',...
+                 'sky','leaves','bark','sand','other','bird'};
+
+chosenCategories=[1 2 4 5 6 7 12];             % You may not be interested in computing for all the categories
+nCategories = length(chosenCategories);     % Number of Categories
 
 % Add the necessary paths
-addpath('..\common_utils\');
-addpath('..\common_utils\region\');
-addpath('..\common_utils\segmentation\');
-addpath('..\common_utils\classifier\');
-addpath('..\common_utils\libsvm-mat-3.0-1\');
-addpath('C:\\Users\\Nikhil\Downloads\\vlfeat-0.9.9-bin\\vlfeat-0.9.9\\toolbox\\');
-vl_setup
+addpath('../common_utils/');
+addpath('../common_utils/classifier/');
+addpath('../common_utils/region/');
+addpath('../common_utils/segmentation/');
+addpath('../common_utils/vlfeat-0.9.9/toolbox/mex/mexa64/');
+addpath('../common_utils/libsvm-mat-3.0-1/');
+addpath('../train_classifiers/common_training_code');
+
+load '../../datafiles/region_training/models.mat';
+load '../../datafiles/region_training/centroids.mat';
 
 % Read all files
 filesList = dir(imageDirectory);
@@ -45,7 +55,7 @@ startLog;
 for k=1:mRows-2
     t1 = tic;
     filename = strcat(imageDirectory,filesList(k+2).name);
-    disp(sprintf('Reading file: %s',filename));
+    fprintf('Reading file: %s',filename);
     
     % Initialization and Preprocessing
     [flags,regionMap,smallRegionIDs,dI,I,height,width] = ...
@@ -74,8 +84,20 @@ for k=1:mRows-2
     imwrite(coloredSegments,newfilename);
     
     % Attempt recognizing segments
-%     [topLabels] = tryPrediction(I, regionMap, unique(regionMap), nColorBins, nSIFT, nLabels);
-%     colorPrediction(I, regionMap, unique(regionMap), topLabels, filename);
+    [labels maxProb] = tryPrediction(I, regionMap, unique(regionMap), nColorBins, nSIFTClusters, nCategories, models, gridUnit, centroids);
+    
+    % Map the returned labels to the chosen labels
+    for i=1:length(labels)
+        if (labels(i) ~= -1)
+            labels(i) = chosenCategories(labels(i));
+        else
+            labels(i) = 11;      % Other
+        end;
+    end;
+    
+    % Color the image
+    I = colorPrediction(I, regionMap, unique(regionMap), labels, gridUnit, maxProb, probThreshold);
+    imwrite(I,sprintf('%s_identified.png',filenameNE));
     
     % Save variables and results
     matfilename = sprintf('%s_numReg_%d_time_%.0f_thr_%.2f_sS_%d.mat',...

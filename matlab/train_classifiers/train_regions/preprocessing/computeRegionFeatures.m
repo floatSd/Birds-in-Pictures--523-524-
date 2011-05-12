@@ -1,13 +1,9 @@
-function computeRegionFeatures(gridUnit, nColorBins, nSiftClusters, nSiftDimensions)
+function computeRegionFeatures(gridUnit, nColorBins, nSiftClusters, nSiftDimensions, baseImageDirectory, allCategoryNames, chosenCategories)
 %% To find the visual features of all regions
 % The beast:
 nVisualFeatures = 3 * nColorBins + nSiftClusters;
-
-baseImageDirectory = '../../../../datafiles/region_training/';
-categoryNames = {'grass','buildings','mud','roads','snow','water',...
-                 'sky','leaves','bark','sand','other','bird'};
-
-nCategories = length(categoryNames);
+             
+nCategories = length(chosenCategories);
 
 features = cell(nCategories,1);              % Visual features for each region in each category
 areas = cell(nCategories,1);                 % Area in Sq. Px. for each region in each category
@@ -32,7 +28,7 @@ load(rgFile);           % filenames{} and regionMaps{}
 nFiles = length(trainingMaps);
 
 for i=1:nCategories
-    features{i} = []; % double(zeros(nVisualFeatures,nSamples(i)));
+    features{i} = [];
 end;
 
 %% PART 1.1 : Calculate Color Histograms and SIFT features
@@ -53,7 +49,7 @@ for f=1:nFiles
     % Look for regions in all categories
     for c=1:nCategories
         % Get the set of region IDs for that category
-        regids = trainingMaps{f}{c};
+        regids = trainingMaps{f}{chosenCategories(c)};
         
         % Remove any duplicates
         regids = unique(regids);
@@ -68,8 +64,8 @@ for f=1:nFiles
             for p=1:nRegions
                 regid = regids(p);
                 
-                % Is it a non-existent region id?
-                if (numel(find(regionMaps{f} == regid)) == 0)
+                % Is a non-existent region id OR is less than gridUnit*gridUnit in size?
+                if (numel(find(regionMaps{f} == regid)) < gridUnit*gridUnit)
                     continue;
                 end;
                 
@@ -129,14 +125,14 @@ end;
 
 %% PART 2: Concatenate random SIFT descriptors and cluster them
 disp('Computing clusters....');
-centroids = computeSIFTClusters(strcat(baseImageDirectory,'siftDescriptors.mat'), nSiftDimensions, nSiftClusters, 1.0);
+centroids = computeSIFTClusters(siftDescriptors, nSiftDimensions, nSiftClusters, 1.0);
 
 % load(strcat(baseImageDirectory,'centroids.mat'));
 save(strcat(baseImageDirectory,'centroids.mat'),'centroids');
 
 %% PART 3: Calculate Visual Word Histograms
 disp('Computing visual words...');
-[counts] = computeVW(strcat(baseImageDirectory,'siftDescriptors.mat'), areas, nSiftDimensions, nSiftClusters, centroids);
+[counts] = computeVW(siftDescriptors, areas, nSiftDimensions, nSiftClusters, centroids);
 
 %% PART 4.1: Group the set of SIFT histograms according to how many were used per region per category
 newCounts = cell(nCategories,1);
@@ -152,7 +148,9 @@ for c=1:nCategories
             tempDescriptor = [tempDescriptor counts{c}(:,counter)];
         end;
         ans = mean(tempDescriptor,2);
-        newCounts{c}(:,i) = ans;
+        
+        % Normalize the SIFT histogram
+        newCounts{c}(:,i) = ans/norm(ans,1);
     end;
 end;
 
@@ -163,7 +161,6 @@ for k=1:nCategories
     
     for i=1:size(kFeatures,2)
         x = kFeatures(:,i);
-        x = x/norm(x);
         kFeatures(:,i) = x;
     end;
         

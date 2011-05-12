@@ -41,12 +41,23 @@ else
     countCells = 0;
     hCells = uint16(floor(h/gridUnit));
     wCells = uint16(floor(w/gridUnit));
+    
+    hCells = 2*hCells - 1;      % Overlap
+    wCells = 2*wCells - 1;      % Overlap
+    
     for i=1:hCells              % Rows
         for j=1:wCells          % Cols
             % Get a region map for that cell
-            gridCellStartRow = (i-1)*gridUnit + startRow;
+%             gridCellStartRow = (i-1)*gridUnit + startRow;
+%             gridCellEndRow = gridCellStartRow + gridUnit - 1;
+%             gridCellStartCol = (j-1)*gridUnit + startCol;
+%             gridCellEndCol = gridCellStartCol + gridUnit - 1;
+%             gridCellRegionMap = ...
+%                 regionMap(gridCellStartRow:gridCellEndRow,gridCellStartCol:gridCellEndCol);
+            
+            gridCellStartRow = (i-1)*gridUnit/2 + startRow;
             gridCellEndRow = gridCellStartRow + gridUnit - 1;
-            gridCellStartCol = (j-1)*gridUnit + startCol;
+            gridCellStartCol = (j-1)*gridUnit/2 + startCol;
             gridCellEndCol = gridCellStartCol + gridUnit - 1;
             gridCellRegionMap = ...
                 regionMap(gridCellStartRow:gridCellEndRow,gridCellStartCol:gridCellEndCol);
@@ -55,8 +66,15 @@ else
             if (numel(find(gridCellRegionMap == regid)) > 0.90*gridUnit*gridUnit)
                 
                 % Get a SIFT descriptor for the cell
-                gridCell = graybox(1+(i-1)*gridUnit:i*gridUnit,...
-                        1+(j-1)*gridUnit:j*gridUnit);
+%                 gridCell = graybox(1+(i-1)*gridUnit:i*gridUnit,...
+%                         1+(j-1)*gridUnit:j*gridUnit);
+                
+                gbRowStart = 1+(i-1)*gridUnit/2;
+                gbRowEnd = (i-1)*gridUnit/2 + gridUnit;
+                gbColStart = 1+(j-1)*gridUnit/2;
+                gbColEnd = (j-1)*gridUnit/2 + gridUnit;
+                gridCell = graybox(gbRowStart:gbRowEnd,gbColStart:gbColEnd);
+                
                 [f d] = vl_sift(gridCell);
                 
                 if ~isempty(d)
@@ -74,8 +92,15 @@ else
         countCells = 0;
         for i=1:hCells              % Rows
             for j=1:wCells          % Cols
-                gridCell = graybox(1+(i-1)*gridUnit:i*gridUnit,...
-                        1+(j-1)*gridUnit:j*gridUnit);
+%                 gridCell = graybox(1+(i-1)*gridUnit:i*gridUnit,...
+%                         1+(j-1)*gridUnit:j*gridUnit);
+                
+                gbRowStart = 1+(i-1)*gridUnit/2;
+                gbRowEnd = (i-1)*gridUnit/2 + gridUnit;
+                gbColStart = 1+(j-1)*gridUnit/2;
+                gbColEnd = (j-1)*gridUnit/2 + gridUnit;
+                gridCell = graybox(gbRowStart:gbRowEnd,gbColStart:gbColEnd);
+                
                 [f d] = vl_sift(gridCell);
 
                 if ~isempty(d)

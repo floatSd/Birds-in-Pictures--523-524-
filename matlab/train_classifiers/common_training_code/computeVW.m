@@ -1,4 +1,4 @@
-function [counts] = computeVW(siftmatfile, areas, nSiftDimensions, nSiftClusters, centroids)
+function [counts] = computeVW(siftDescriptors, areas, nSiftDimensions, nSiftClusters, centroids)
 %  Works on a set of categories as a whole.
 % Author:   Nikhil Patwardhan
 % Program:  To find visual word histograms for all images
@@ -6,7 +6,6 @@ function [counts] = computeVW(siftmatfile, areas, nSiftDimensions, nSiftClusters
 multiplier = 10000;         % To prevent underflow in visual word kCounts
 counts = {};
 
-load(siftmatfile);          % siftDescriptors
 for k=1:length(siftDescriptors)
     nFiles = length(siftDescriptors{k});
     % Initialize a histogram of kCounts for all images
@@ -34,7 +33,7 @@ for k=1:length(siftDescriptors)
             kCounts(i,minT) = kCounts(i,minT) + 1;
         end;
         % Compute a normalized count
-        kCounts(i,:) = double(kCounts(i,:)) * multiplier / double(areas{k}(i));
+        kCounts(i,:) = double(kCounts(i,:))/norm(kCounts(i,:),1);
     end;
     counts{k} = kCounts';
 end;

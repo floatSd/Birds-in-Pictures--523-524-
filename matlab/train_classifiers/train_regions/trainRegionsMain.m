@@ -1,8 +1,15 @@
-gridUnit = 50;
-nColorBins = 16;
-nSiftClusters = 80;
+gridUnit = 40;
+nColorBins = 32;
+nSiftClusters = 50;
 nSiftDimensions = 128;
-nCategories = 12;
+trainingPercentage = 0.5;
+
+categoryNames = {'grass','buildings','mud','roads','snow','water',...
+                 'sky','leaves','bark','sand','other','bird'};
+
+chosenCategories=[1 2 4 5 6 7 12];          % You may not be interested in computing for all the categories
+
+nCategories = length(chosenCategories);
 
 models = cell(nCategories,1);
 probMatrix = cell(nCategories,1);
@@ -10,16 +17,18 @@ testingSize = cell(nCategories,1);
 
 addpath('./preprocessing/');
 addpath('../common_training_code');
+addpath('../../common_utils/');
+addpath('../../common_utils/classifier/');
+addpath('../../common_utils/region/');
+addpath('../../common_utils/vlfeat-0.9.9/toolbox/mex/mexa64/');
 addpath('../../common_utils/libsvm-mat-3.0-1/');
 
-categoryNames = {'grass','buildings','mud','roads','snow','water',...
-                 'sky','leaves','bark','sand','other','bird'};
-             
 %% PART 1: Compute visual features
-% computeRegionFeatures(gridUnit, nColorBins, nSiftClusters, nSiftDimensions);           % TO DO Fix path problem Need to run only once
-
+cd './preprocessing';
+computeRegionFeatures(gridUnit, nColorBins, nSiftClusters, nSiftDimensions, '../../../../datafiles/region_training/', categoryNames, chosenCategories);           % TO DO Fix path problem Need to run only once
+cd ..;
 %% PART 2: Prepare sets of positive and negative examples
-prepareTrainingMatrices('../../../datafiles/region_training/', nColorBins, nSiftClusters, nCategories);        % Need to run only once
+prepareTrainingMatrices('../../../datafiles/region_training/', nColorBins, nSiftClusters, nCategories, trainingPercentage);        % Need to run only once
 
 %% PART 3: Train the models
 % [models{1} probMatrix{1} testingSize{1}] = buildAndTestModel(1, 8, 2, '../../../datafiles/region_training/', nCategories);
@@ -37,9 +46,10 @@ prepareTrainingMatrices('../../../datafiles/region_training/', nColorBins, nSift
 
 for i=1:nCategories
     disp(sprintf('Category: %s',categoryNames{i}));
-    [models{i} probMatrix{i} testingSize{i}] = buildAndTestModel(i, 64, 1/8, '../../../datafiles/region_training/', nCategories);
+    [models{i} probMatrix{i} testingSize{i}] = buildAndTestModel(i, 128, 2, '../../../datafiles/region_training/', nCategories);
 end;
 
+save('../../../datafiles/region_training/models.mat','models');
 %% PART 4: Process the results in a human understandable manner
 reorderedProbMatrix = cell(nCategories,1);
 for i=1:nCategories
@@ -65,7 +75,12 @@ end;
 
 accuracies = double(zeros(nCategories,1));
 for i=1:nCategories
-    disp(sprintf('Accuracy for label %s is %.2f %',categoryNames{i},100*confusionMatrix(i,i)/sum(confusionMatrix(i,:))));
+    disp(sprintf('Accuracy for label %s is %.2f %',categoryNames{chosenCategories(i)},100*confusionMatrix(i,i)/sum(confusionMatrix(i,:))));
     accuracies(i) = 100*double(confusionMatrix(i,i))/double(sum(confusionMatrix(i,:)));
 end;
+
+confusionMatrix(:,end+1)=accuracies';       % Append accuracies to the confusion matrix
+confusionMatrix(:,end+1)=cell2mat(testingSize);     % Append testing sizes
+confusionMatrix(:,end+1)=floor(cell2mat(testingSize) * trainingPercentage / (1 - trainingPercentage));   % Append training sizes
+confusionMatrix(:,end+1)=confusionMatrix(:,end) + confusionMatrix(:,end-1);   % Append total sizes
 save('../../../datafiles/region_training/confusion.mat','confusionMatrix');

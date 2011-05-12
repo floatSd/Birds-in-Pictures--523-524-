@@ -1,5 +1,5 @@
 function [centroids] = ...
-    computeSIFTClusters(siftmatfile, nSiftDimensions, nSiftClusters, nRandomSelect)
+    computeSIFTClusters(siftDescriptors, nSiftDimensions, nSiftClusters, nRandomSelect)
 %% Clusters the SIFT descriptors by selecting some of them at random.
 %  matfile = cell array with all categories' sift descriptors.
 %  Works on a set of categories as a whole.
@@ -10,7 +10,6 @@ end;
 
 all = [];
 
-load(siftmatfile);          % siftDescriptors
 for k=1:length(siftDescriptors)
     % Find how many descriptors
     q = size(siftDescriptors{k},1);
